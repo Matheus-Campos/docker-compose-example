@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  api:
+    build: .
+    command: npm start
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+      - mailcatcher
+    ports:
+      - 3000:3000
+    environment: # docker compose exchanges the service name for container IP
+        DB_HOST: postgres
+        REDIS: redis
+        SMTP_HOST: mailcatcher
+
+  postgres:
+    image: postgres:10.3-alpine
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  redis:
+    image: redis:4.0-alpine
+    command: redis-server
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    command: mailcatcher --no-quit --foreground --ip=0.0.0.0
+    ports:
+      - 1080:1080
